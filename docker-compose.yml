@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - test-medusa_bridge
+
+  medusa:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["npx", "medusa", "develop"]
+    environment:
+      MEDUSA_DATABASE_URL: postgres://test:test@postgres:5432/test
+    depends_on:
+      - postgres
+    ports:
+      - "9000:9000"
+      - "7001:7001"
+    networks:
+      - test-medusa_bridge
+
+volumes:
+  postgres_data:
+
+networks:
+  test-medusa_bridge:
+    external: true
